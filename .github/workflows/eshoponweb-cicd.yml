@@ -5,11 +5,10 @@ on: [push, workflow_dispatch]
 
 #Environment variables https://docs.github.com/en/actions/learn-github-actions/environment-variables
 env:
-  RESOURCE-GROUP: gh200lab
-  LOCATION: eastus
+  RESOURCE-GROUP: az400m03l07-RG
+  LOCATION: WestUS2 
   TEMPLATE-FILE: infra/webapp.bicep
-  SUBSCRIPTION-ID: 79cc3947-3ec7-480f-b68a-c46439bd88ec
-  WEBAPP-NAME: gh200lab007
+  SUBSCRIPTION-ID: 0e840818-c4b4-4569-9335-ebd9b5c7b194
 
 jobs:
   #Build, test and publish .net web project in repository
@@ -41,13 +40,6 @@ jobs:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/app.zip
 
-      # upload the bicep template as artifacts for next job
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v5
-        with:
-          name: bicep-template
-          path: ${{ env.TEMPLATE-FILE }}
-
   # Use Bicep to deploy infrastructure + Publish webapp
   deploy:
     runs-on: ubuntu-latest
@@ -62,28 +54,11 @@ jobs:
           name: .net-app
           path: .net-app
 
-      #Download the bicep templates from previous job
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v6
-        with:
-          name: bicep-template
-          path: bicep-template
-
       #Login in your azure subscription using a service principal (credentials stored as GitHub Secret in repo)
       - name: Azure Login
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      # Deploy Azure WebApp using Bicep file
-      - name: deploy
-        uses: azure/arm-deploy@v2
-        with:
-          subscriptionId: ${{ env.SUBSCRIPTION-ID }}
-          resourceGroupName: ${{ env.RESOURCE-GROUP }}
-          template: bicep-template/webapp.bicep
-          parameters: "webAppName=${{ env.WEBAPP-NAME }} location=${{ env.LOCATION }}"
-          failOnStdErr: false
 
       # Publish website to Azure App Service (WebApp)
       # Step disabled due to issue where the site sometimes can't be found: https://github.com/microsoft/pipelines-appservice-lib/issues/56. Instead deploy using CLI
@@ -92,7 +67,7 @@ jobs:
         uses: Azure/webapps-deploy@v3
         with:
           type: ZIP
-          app-name: ${{ env.WEBAPP-NAME  }}
+          app-name: eshoponwebyaml59356557.azurewebsites.net
           package: .net-app/app.zip
 
       # Publish website to Azure App Service using CLI (WebApp)
@@ -100,4 +75,4 @@ jobs:
         uses: Azure/cli@v2
         with:
           inlineScript: |
-            az webapp deploy --name ${{ env.WEBAPP-NAME }} --resource-group ${{ env.RESOURCE-GROUP }} --src-path .net-app/app.zip --type zip
+            az webapp deploy --name eshoponwebyaml59356557.azurewebsites.net --resource-group ${{ env.RESOURCE-GROUP }} --src-path .net-app/app.zip --type zip
