@@ -67,7 +67,7 @@ jobs:
         uses: Azure/webapps-deploy@v3
         with:
           type: ZIP
-          app-name: eshoponwebyaml59356557.azurewebsites.net
+          app-name: eshoponwebyaml59356557
           package: .net-app/app.zip
 
       # Publish website to Azure App Service using CLI (WebApp)
@@ -75,4 +75,4 @@ jobs:
         uses: Azure/cli@v2
         with:
           inlineScript: |
-            az webapp deploy --name eshoponwebyaml59356557.azurewebsites.net --resource-group ${{ env.RESOURCE-GROUP }} --src-path .net-app/app.zip --type zip
+            az webapp deploy --name eshoponwebyaml59356557 --resource-group ${{ env.RESOURCE-GROUP }} --src-path .net-app/app.zip --type zip
